@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random → Params generator</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#60a5fa}
+    body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071024 0%, #071832 100%);color:#e6eef6;margin:0;padding:32px}
+    .container{max-width:920px;margin:0 auto}
+    h1{font-size:20px;margin:0 0 12px}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 20px rgba(2,6,23,0.6);}
+    textarea{width:100%;min-height:120px;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-family:monospace}
+    .row{display:flex;gap:8px;margin-top:10px}
+    button{background:var(--accent);border:none;color:#07203a;padding:10px 12px;border-radius:8px;cursor:pointer}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    pre{background:#071428;padding:12px;border-radius:8px;overflow:auto;font-family:monospace}
+    .muted{color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Random → Params generator</h1>
+    <div class="card">
+      <p class="muted">Paste one or more random strings (one per line). Click <strong>Analyze</strong>. Each alphanumeric chunk becomes a parameter like <code>[min_max_Types]</code>. Types: <code>A</code>=Uppercase, <code>a</code>=lowercase, <code>N</code>=number.</p>
+
+      <label for="input">Random strings (one per line)</label>
+      <textarea id="input" placeholder=""></textarea>
+
+      <div class="row">
+        <button id="analyzeBtn">Analyze</button>
+        <button class="secondary" id="mergeBtn">Merge lines (if same separators)</button>
+        <button class="secondary" id="clearBtn">Clear</button>
+        <div style="flex:1"></div>
+        <button id="copyBtn">Copy result</button>
+      </div>
+
+      <h3 style="margin-top:14px">Result</h3>
+      <pre id="result">(no output yet)</pre>
+    </div>
+  </div>
+
+<script>
+function analyzeLine(line){
+  const re = /([A-Za-z0-9]+)|([^A-Za-z0-9]+)/g;
+  let m; const parts = [];
+  while((m = re.exec(line)) !== null){
+    if(m[1]){ 
+      const token = m[1];
+      const hasUpper = /[A-Z]/.test(token);
+      const hasLower = /[a-z]/.test(token);
+      const hasNum = /[0-9]/.test(token);
+      let types = '';
+      if(hasUpper) types += 'A';
+      if(hasLower) types += 'a';
+      if(hasNum) types += 'N';
+      const len = token.length;
+      parts.push({type:'param', len:minMax(len,len), types});
+    } else {
+      parts.push({type:'sep', val:m[2]});
+    }
+  }
+  return parts;
+}
+function minMax(a,b){ return [a,b]; }
+function partsToString(parts){
+  return parts.map(p => p.type==='sep'? p.val : `[${p.len[0]}_${p.len[1]}_${p.types}]`).join('');
+}
+
+function analyzeAll(lines){
+  return lines.map(l => ({line:l, parts: analyzeLine(l)}));
+}
+
+function tryMerge(results){
+  if(results.length===0) return {ok:false,msg:'no lines'};
+  if(results.length===1) return {ok:true, merged: partsToString(results[0].parts)};
+  const ref = results[0].parts.map(p=> p.type==='sep' ? ('sep:'+p.val) : 'param');
+  for(let i=1;i<results.length;i++){
+    const row = results[i].parts.map(p=> p.type==='sep' ? ('sep:'+p.val) : 'param');
+    if(row.length !== ref.length) return {ok:false, msg:'Lines have different token/separator structure (different lengths)'};
+    for(let j=0;j<ref.length;j++){
+      if(ref[j].startsWith('sep:')){
+        if(row[j] !== ref[j]) return {ok:false, msg:'Separators differ between lines; cannot merge automatically.'};
+      }
+    }
+  }
+  const mergedParts = [];
+  const n = ref.length;
+  for(let pos=0; pos<n; pos++){
+    if(ref[pos].startsWith('sep:')){
+      mergedParts.push({type:'sep', val: results[0].parts[pos].val});
+    } else {
+      let minL = Infinity, maxL = -Infinity;
+      let unionTypes = new Set();
+      for(let r of results){
+        const p = r.parts[pos];
+        if(!p || p.type!=='param') return {ok:false,msg:'unexpected token mismatch'};
+        minL = Math.min(minL, p.len[0]);
+        maxL = Math.max(maxL, p.len[1]);
+        for(const ch of p.types) unionTypes.add(ch);
+      }
+      const order = ['A','a','N'];
+      const typesStr = order.filter(x => unionTypes.has(x)).join('');
+      mergedParts.push({type:'param', len:[minL,maxL], types:typesStr});
+    }
+  }
+  return {ok:true, merged: partsToString(mergedParts)};
+}
+
+const inputEl = document.getElementById('input');
+const resultEl = document.getElementById('result');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const mergeBtn = document.getElementById('mergeBtn');
+const clearBtn = document.getElementById('clearBtn');
+const copyBtn = document.getElementById('copyBtn');
+
+analyzeBtn.addEventListener('click', ()=>{
+  const raw = inputEl.value.trim();
+  if(!raw){ resultEl.textContent = '(empty)'; return; }
+  const lines = raw.split(/\r?\n/).filter(Boolean);
+  const res = analyzeAll(lines);
+  const outLines = res.map(r => partsToString(r.parts));
+  resultEl.textContent = outLines.join('\n');
+});
+
+mergeBtn.addEventListener('click', ()=>{
+  const raw = inputEl.value.trim();
+  if(!raw){ resultEl.textContent = '(empty)'; return; }
+  const lines = raw.split(/\r?\n/).filter(Boolean);
+  const res = analyzeAll(lines);
+  const m = tryMerge(res);
+  if(m.ok){ resultEl.textContent = m.merged; }
+  else { resultEl.textContent = 'Error: '+m.msg; }
+});
+
+clearBtn.addEventListener('click', ()=>{ inputEl.value=''; resultEl.textContent='(no output yet)'; });
+
+copyBtn.addEventListener('click', ()=>{
+  const t = resultEl.textContent;
+  if(!t) return;
+  navigator.clipboard.writeText(t).then(()=>{
+    copyBtn.textContent = 'Copied!'; setTimeout(()=>copyBtn.textContent='Copy result',900);
+  }).catch(()=>{ copyBtn.textContent='Copy failed'; setTimeout(()=>copyBtn.textContent='Copy result',900); });
+});
+</script>
+</body>
+</html>
