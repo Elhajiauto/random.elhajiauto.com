@@ -1,283 +1,619 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tools – Random, IPv6, Quoted-Printable</title>
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#60a5fa}
-    body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-         background:linear-gradient(180deg,#071024 0%, #071832 100%);
-         color:#e6eef6;margin:0;padding:32px}
-    .container{max-width:920px;margin:0 auto}
-    h1{font-size:22px;margin:0 0 16px}
-    h2{font-size:18px;margin:0 0 12px}
-    .card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:24px;
-          box-shadow:0 6px 20px rgba(2,6,23,0.6);}
-    textarea{width:100%;min-height:120px;padding:12px;border-radius:8px;
-             border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-family:monospace}
-    .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-    button{background:var(--accent);border:none;color:#07203a;padding:10px 12px;
-           border-radius:8px;cursor:pointer}
-    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-    pre{background:#071428;padding:12px;border-radius:8px;overflow:auto;font-family:monospace}
-    .muted{color:var(--muted);font-size:13px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern All-in-One Tools</title>
+    <style>
+        :root {
+            --bg: #0f1724;
+            --card: #0b1220;
+            --muted: #9aa4b2;
+            --accent: #60a5fa;
+            --accent-hover: #3b82f6;
+            --text-primary: #e6eef6;
+            --text-secondary: #cbd5e1;
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 10px 25px rgba(2, 6, 23, 0.5);
+            --radius: 12px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #071024 0%, #071832 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(2, 6, 23, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(96, 165, 250, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--accent);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .card-description {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 36, 0.5);
+            color: inherit;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--accent);
+            border: none;
+            color: #07203a;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .result-container {
+            margin-top: 20px;
+        }
+
+        .result-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-label::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+            margin-left: 8px;
+        }
+
+        .result-box {
+            background: rgba(7, 20, 40, 0.6);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .result-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .result-box::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        .result-box::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .select-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        select {
+            background: rgba(15, 23, 36, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: inherit;
+            font-size: 14px;
+            appearance: none;
+            padding-right: 32px;
+        }
+
+        .select-wrapper::after {
+            content: "▼";
+            position: absolute;
+            right: 12px;
+            pointer-events: none;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 16px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>All-in-One Tools</h1>
+    <div class="container">
+        <div class="header">
+            <h1>All-in-One Tools</h1>
+            <p class="subtitle">A collection of useful utilities for developers and IT professionals</p>
+        </div>
 
-    <!-- Card 1: Random → Params generator -->
-    <div class="card">
-      <h2>Random → Params generator</h2>
-      <p class="muted">Paste one or more random strings (one per line). Click <strong>Analyze</strong>. Each alphanumeric chunk becomes a parameter like <code>[min_max_Types]</code>.</p>
-      <label for="inputRandom">Random strings</label>
-      <textarea id="inputRandom"></textarea>
-      <div class="row">
-        <button id="analyzeBtn">Analyze</button>
-        <button class="secondary" id="mergeBtn">Merge lines</button>
-        <button class="secondary" id="clearBtn">Clear</button>
-        <div style="flex:1"></div>
-        <button id="copyBtn">Copy result</button>
-      </div>
-      <h3>Result</h3>
-      <pre id="resultRandom">(no output yet)</pre>
+        <div class="tools-grid">
+            <!-- Card 1: Random → Params generator -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔍</div>
+                    <h2>Random → Params Generator</h2>
+                </div>
+                <p class="card-description">Paste one or more random strings (one per line). Click <strong>Analyze</strong>. Each alphanumeric chunk becomes a parameter like <code>[min_max_Types]</code>.</p>
+                
+                <label for="inputRandom">Random strings</label>
+                <textarea id="inputRandom" placeholder="Example:&#10;ABC123&#10;test_456"></textarea>
+                
+                <div class="row">
+                    <button id="analyzeBtn">
+                        <span>Analyze</span>
+                    </button>
+                    <button class="secondary" id="mergeBtn">
+                        <span>Merge lines</span>
+                    </button>
+                    <button class="secondary" id="clearBtn">
+                        <span>Clear</span>
+                    </button>
+                    <div style="flex:1"></div>
+                    <button id="copyBtn">
+                        <span>Copy result</span>
+                    </button>
+                </div>
+                
+                <div class="result-container">
+                    <div class="result-label">Result</div>
+                    <div class="result-box" id="resultRandom">(no output yet)</div>
+                </div>
+            </div>
+
+            <!-- Card 2: IPv4 → IPv6-mapped -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌐</div>
+                    <h2>IPv4 → IPv6-mapped</h2>
+                </div>
+                <p class="card-description">Enter one or more IPv4 addresses (one per line), then convert to IPv6-mapped format.</p>
+                
+                <label for="inputIPv4">IPv4 addresses</label>
+                <textarea id="inputIPv4" placeholder="192.168.0.1&#10;8.8.8.8"></textarea>
+                
+                <div class="row">
+                    <button id="ipv6Btn">
+                        <span>Convert</span>
+                    </button>
+                </div>
+                
+                <div class="result-container">
+                    <div class="result-label">Result</div>
+                    <div class="result-box" id="resultIPv6">(no output yet)</div>
+                </div>
+            </div>
+
+            <!-- Card 3: Quoted-Printable Encode/Decode -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-header">
+                    <div class="card-icon">📧</div>
+                    <h2>Quoted-Printable Encode/Decode</h2>
+                </div>
+                <p class="card-description">Enter text or Quoted-Printable data, then choose Encode or Decode.</p>
+                
+                <label for="inputQP">Input</label>
+                <textarea id="inputQP" placeholder="Hello World =3D Test"></textarea>
+
+                <!-- Options -->
+                <div class="row">
+                    <label class="select-wrapper">
+                        Charset:
+                        <select id="charsetQP">
+                            <option value="utf-8">UTF-8</option>
+                            <option value="iso-8859-1">ISO-8859-1</option>
+                        </select>
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="oneLineQP"> One line
+                    </label>
+                </div>
+
+                <div class="row">
+                    <button id="encodeQP">
+                        <span>Encode</span>
+                    </button>
+                    <button id="decodeQP">
+                        <span>Decode</span>
+                    </button>
+                    <button class="secondary" id="clearQP">
+                        <span>Clear</span>
+                    </button>
+                </div>
+                
+                <div class="result-container">
+                    <div class="result-label">Result</div>
+                    <div class="result-box" id="resultQP">(no output yet)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>All-in-One Tools &copy; 2023 | Data is processed locally in your browser</p>
+        </div>
     </div>
 
-    <!-- Card 2: IPv4 → IPv6-mapped -->
-    <div class="card">
-      <h2>IPv4 → IPv6-mapped</h2>
-      <p class="muted">Enter one or more IPv4 addresses (one per line), then convert.</p>
-      <label for="inputIPv4">IPv4 addresses</label>
-      <textarea id="inputIPv4" placeholder="192.168.0.1&#10;8.8.8.8"></textarea>
-      <div class="row">
-        <button id="ipv6Btn">Convert</button>
-      </div>
-      <h3>Result</h3>
-      <pre id="resultIPv6">(no output yet)</pre>
-    </div>
+    <script>
+        /* ---------------- RANDOM GENERATOR ---------------- */
+        function analyzeLine(line){
+            const re = /([A-Za-z0-9]+)|([^A-Za-z0-9]+)/g;
+            let m; const parts = [];
+            while((m = re.exec(line)) !== null){
+                if(m[1]){ 
+                    const token = m[1];
+                    const hasUpper = /[A-Z]/.test(token);
+                    const hasLower = /[a-z]/.test(token);
+                    const hasNum = /[0-9]/.test(token);
+                    let types = '';
+                    if(hasUpper) types += 'A';
+                    if(hasLower) types += 'a';
+                    if(hasNum) types += 'N';
+                    const len = token.length;
+                    parts.push({type:'param', len:[len,len], types});
+                } else {
+                    parts.push({type:'sep', val:m[2]});
+                }
+            }
+            return parts;
+        }
+        
+        function partsToString(parts){
+            return parts.map(p => p.type==='sep'? p.val : `[${p.len[0]}_${p.len[1]}_${p.types}]`).join('');
+        }
+        
+        function analyzeAll(lines){
+            return lines.map(l => ({line:l, parts: analyzeLine(l)}));
+        }
+        
+        function tryMerge(results){
+            if(results.length===0) return {ok:false,msg:'no lines'};
+            if(results.length===1) return {ok:true, merged: partsToString(results[0].parts)};
+            const ref = results[0].parts.map(p=> p.type==='sep' ? ('sep:'+p.val) : 'param');
+            for(let i=1;i<results.length;i++){
+                const row = results[i].parts.map(p=> p.type==='sep' ? ('sep:'+p.val) : 'param');
+                if(row.length !== ref.length) return {ok:false, msg:'Lines have different structure'};
+                for(let j=0;j<ref.length;j++){
+                    if(ref[j].startsWith('sep:') && row[j] !== ref[j]) return {ok:false, msg:'Separators differ'};
+                }
+            }
+            const mergedParts = [];
+            for(let pos=0; pos<ref.length; pos++){
+                if(ref[pos].startsWith('sep:')){
+                    mergedParts.push({type:'sep', val: results[0].parts[pos].val});
+                } else {
+                    let minL = Infinity, maxL = -Infinity;
+                    let unionTypes = new Set();
+                    for(let r of results){
+                        const p = r.parts[pos];
+                        minL = Math.min(minL, p.len[0]);
+                        maxL = Math.max(maxL, p.len[1]);
+                        for(const ch of p.types) unionTypes.add(ch);
+                    }
+                    const order = ['A','a','N'];
+                    const typesStr = order.filter(x => unionTypes.has(x)).join('');
+                    mergedParts.push({type:'param', len:[minL,maxL], types:typesStr});
+                }
+            }
+            return {ok:true, merged: partsToString(mergedParts)};
+        }
+        
+        const inputRandom = document.getElementById('inputRandom');
+        const resultRandom = document.getElementById('resultRandom');
+        const copyBtn = document.getElementById('copyBtn');
 
-    <!-- Card 3: Quoted-Printable Encode/Decode -->
-    <div class="card">
-      <h2>Quoted-Printable Encode/Decode</h2>
-      <p class="muted">Enter text or Quoted-Printable data, then choose Encode or Decode.</p>
-      <label for="inputQP">Input</label>
-      <textarea id="inputQP" placeholder="Hello World =3D Test"></textarea>
+        document.getElementById('analyzeBtn').addEventListener('click', ()=>{
+            const raw = inputRandom.value.trim();
+            if(!raw){ resultRandom.textContent = '(empty)'; return; }
+            const lines = raw.split(/\r?\n/).filter(Boolean);
+            const res = analyzeAll(lines);
+            resultRandom.textContent = res.map(r => partsToString(r.parts)).join('\n');
+        });
+        
+        document.getElementById('mergeBtn').addEventListener('click', ()=>{
+            const raw = inputRandom.value.trim();
+            if(!raw){ resultRandom.textContent = '(empty)'; return; }
+            const lines = raw.split(/\r?\n/).filter(Boolean);
+            const res = analyzeAll(lines);
+            const m = tryMerge(res);
+            resultRandom.textContent = m.ok? m.merged : 'Error: '+m.msg;
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', ()=>{
+            inputRandom.value=''; resultRandom.textContent='(no output yet)';
+        });
+        
+        copyBtn.addEventListener('click', ()=>{
+            const t = resultRandom.textContent;
+            if(!t || t === '(no output yet)' || t === '(empty)') return;
+            navigator.clipboard.writeText(t).then(()=>{
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<span>Copied!</span>';
+                setTimeout(()=>{
+                    copyBtn.innerHTML = originalText;
+                }, 1500);
+            }).catch(()=>{
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<span>Copy failed</span>';
+                setTimeout(()=>{
+                    copyBtn.innerHTML = originalText;
+                }, 1500);
+            });
+        });
 
-      <!-- Options -->
-      <div class="row">
-        <label for="charsetQP" style="flex:1">
-          Charset:
-          <select id="charsetQP">
-            <option value="utf-8">UTF-8</option>
-            <option value="iso-8859-1">ISO-8859-1</option>
-          </select>
-        </label>
-        <label style="display:flex;align-items:center;gap:6px">
-          <input type="checkbox" id="oneLineQP"> One line
-        </label>
-      </div>
+        /* ---------------- IPv4 → IPv6 MAPPED ---------------- */
+        function ipv4ToIpv6Mapped(ip) {
+            const ipv4Regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+            const m = ip.match(ipv4Regex);
+            if (!m) return null;
 
-      <div class="row">
-        <button id="encodeQP">Encode</button>
-        <button id="decodeQP">Decode</button>
-        <button class="secondary" id="clearQP">Clear</button>
-      </div>
+            const a = parseInt(m[1],10), b = parseInt(m[2],10);
+            const c = parseInt(m[3],10), d = parseInt(m[4],10);
 
-      <h3>Result</h3>
-      <pre id="resultQP">(no output yet)</pre>
-    </div>
-  </div>
+            const part1 = ((a << 8) | b).toString(16);
+            const part2 = ((c << 8) | d).toString(16);
 
-<script>
-/* ---------------- RANDOM GENERATOR ---------------- */
-function analyzeLine(line){
-  const re = /([A-Za-z0-9]+)|([^A-Za-z0-9]+)/g;
-  let m; const parts = [];
-  while((m = re.exec(line)) !== null){
-    if(m[1]){ 
-      const token = m[1];
-      const hasUpper = /[A-Z]/.test(token);
-      const hasLower = /[a-z]/.test(token);
-      const hasNum = /[0-9]/.test(token);
-      let types = '';
-      if(hasUpper) types += 'A';
-      if(hasLower) types += 'a';
-      if(hasNum) types += 'N';
-      const len = token.length;
-      parts.push({type:'param', len:[len,len], types});
-    } else {
-      parts.push({type:'sep', val:m[2]});
-    }
-  }
-  return parts;
-}
-function partsToString(parts){
-  return parts.map(p => p.type==='sep'? p.val : `[${p.len[0]}_${p.len[1]}_${p.types}]`).join('');
-}
-function analyzeAll(lines){
-  return lines.map(l => ({line:l, parts: analyzeLine(l)}));
-}
-function tryMerge(results){
-  if(results.length===0) return {ok:false,msg:'no lines'};
-  if(results.length===1) return {ok:true, merged: partsToString(results[0].parts)};
-  const ref = results[0].parts.map(p=> p.type==='sep' ? ('sep:'+p.val) : 'param');
-  for(let i=1;i<results.length;i++){
-    const row = results[i].parts.map(p=> p.type==='sep' ? ('sep:'+p.val) : 'param');
-    if(row.length !== ref.length) return {ok:false, msg:'Lines have different structure'};
-    for(let j=0;j<ref.length;j++){
-      if(ref[j].startsWith('sep:') && row[j] !== ref[j]) return {ok:false, msg:'Separators differ'};
-    }
-  }
-  const mergedParts = [];
-  for(let pos=0; pos<ref.length; pos++){
-    if(ref[pos].startsWith('sep:')){
-      mergedParts.push({type:'sep', val: results[0].parts[pos].val});
-    } else {
-      let minL = Infinity, maxL = -Infinity;
-      let unionTypes = new Set();
-      for(let r of results){
-        const p = r.parts[pos];
-        minL = Math.min(minL, p.len[0]);
-        maxL = Math.max(maxL, p.len[1]);
-        for(const ch of p.types) unionTypes.add(ch);
-      }
-      const order = ['A','a','N'];
-      const typesStr = order.filter(x => unionTypes.has(x)).join('');
-      mergedParts.push({type:'param', len:[minL,maxL], types:typesStr});
-    }
-  }
-  return {ok:true, merged: partsToString(mergedParts)};
-}
-const inputRandom = document.getElementById('inputRandom');
-const resultRandom = document.getElementById('resultRandom');
-const copyBtn = document.getElementById('copyBtn');
+            return `::ffff:${part1}:${part2}`;
+        }
+        
+        const inputIPv4 = document.getElementById('inputIPv4');
+        const resultIPv6 = document.getElementById('resultIPv6');
+        
+        document.getElementById('ipv6Btn').addEventListener('click', ()=>{
+            const raw = inputIPv4.value.trim();
+            if(!raw){ resultIPv6.textContent = '(empty)'; return; }
+            const lines = raw.split(/\r?\n/).filter(Boolean);
+            const converted = lines.map(ip => ipv4ToIpv6Mapped(ip) || `(invalid IPv4: ${ip})`);
+            resultIPv6.textContent = converted.join('\n');
+        });
 
-document.getElementById('analyzeBtn').addEventListener('click', ()=>{
-  const raw = inputRandom.value.trim();
-  if(!raw){ resultRandom.textContent = '(empty)'; return; }
-  const lines = raw.split(/\r?\n/).filter(Boolean);
-  const res = analyzeAll(lines);
-  resultRandom.textContent = res.map(r => partsToString(r.parts)).join('\n');
-});
-document.getElementById('mergeBtn').addEventListener('click', ()=>{
-  const raw = inputRandom.value.trim();
-  if(!raw){ resultRandom.textContent = '(empty)'; return; }
-  const lines = raw.split(/\r?\n/).filter(Boolean);
-  const res = analyzeAll(lines);
-  const m = tryMerge(res);
-  resultRandom.textContent = m.ok? m.merged : 'Error: '+m.msg;
-});
-document.getElementById('clearBtn').addEventListener('click', ()=>{
-  inputRandom.value=''; resultRandom.textContent='(no output yet)';
-});
-copyBtn.addEventListener('click', ()=>{
-  const t = resultRandom.textContent;
-  if(!t) return;
-  navigator.clipboard.writeText(t).then(()=>{
-    copyBtn.textContent = 'Copied!'; setTimeout(()=>copyBtn.textContent='Copy result',900);
-  }).catch(()=>{ copyBtn.textContent='Copy failed'; setTimeout(()=>copyBtn.textContent='Copy result',900); });
-});
+        /* ---------------- QUOTED-PRINTABLE ---------------- */
+        function encodeQPWithOptions(str, charset, oneLine) {
+            let buffer;
+            if (charset.toLowerCase() === 'utf-8') {
+                buffer = new TextEncoder().encode(str);
+            } else if (charset.toLowerCase() === 'iso-8859-1') {
+                buffer = new Uint8Array(str.split('').map(c => c.charCodeAt(0) & 0xFF));
+            } else {
+                buffer = new TextEncoder().encode(str);
+            }
 
-/* ---------------- IPv4 → IPv6 MAPPED ---------------- */
-function ipv4ToIpv6Mapped(ip) {
-  const ipv4Regex = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
-  const m = ip.match(ipv4Regex);
-  if (!m) return null;
+            const maxLineLength = 76;
+            let encoded = "";
+            let lineLength = 0;
 
-  const a = parseInt(m[1],10), b = parseInt(m[2],10);
-  const c = parseInt(m[3],10), d = parseInt(m[4],10);
+            for (let i=0; i<buffer.length; i++) {
+                const byte = buffer[i];
+                let out;
 
-  const part1 = ((a << 8) | b).toString(16);
-  const part2 = ((c << 8) | d).toString(16);
+                if (byte === 0x0A && !oneLine) {
+                    // إذا newline => سطر جديد بلا "=0A"
+                    encoded += "\r\n";
+                    lineLength = 0;
+                    continue;
+                }
 
-  return `::ffff:${part1}:${part2}`;
-}
-const inputIPv4 = document.getElementById('inputIPv4');
-const resultIPv6 = document.getElementById('resultIPv6');
-document.getElementById('ipv6Btn').addEventListener('click', ()=>{
-  const raw = inputIPv4.value.trim();
-  if(!raw){ resultIPv6.textContent = '(empty)'; return; }
-  const lines = raw.split(/\r?\n/).filter(Boolean);
-  const converted = lines.map(ip => ipv4ToIpv6Mapped(ip) || `(invalid IPv4: ${ip})`);
-  resultIPv6.textContent = converted.join('\n');
-});
+                if ((byte >= 33 && byte <= 126 && byte !== 61) || byte === 9 || byte === 32) {
+                    out = String.fromCharCode(byte);
+                } else {
+                    out = "=" + byte.toString(16).toUpperCase().padStart(2, "0");
+                }
 
-/* ---------------- QUOTED-PRINTABLE ---------------- */
-function encodeQPWithOptions(str, charset, oneLine) {
-  let buffer;
-  if (charset.toLowerCase() === 'utf-8') {
-    buffer = new TextEncoder().encode(str);
-  } else if (charset.toLowerCase() === 'iso-8859-1') {
-    buffer = new Uint8Array(str.split('').map(c => c.charCodeAt(0) & 0xFF));
-  } else {
-    buffer = new TextEncoder().encode(str);
-  }
+                if (!oneLine && lineLength + out.length > maxLineLength) {
+                    encoded += "=\r\n";
+                    lineLength = 0;
+                }
+                encoded += out;
+                lineLength += out.length;
+            }
 
-  const maxLineLength = 76;
-  let encoded = "";
-  let lineLength = 0;
+            return encoded;
+        }
 
-  for (let i=0; i<buffer.length; i++) {
-    const byte = buffer[i];
-    let out;
+        // Decode stays simple (UTF-8 mainly)
+        function decodeQuotedPrintable(input) {
+            let text = input.replace(/=\r?\n/g, "");
+            text = text.replace(/=([A-Fa-f0-9]{2})/g,
+                (m, hex) => String.fromCharCode(parseInt(hex, 16))
+            );
+            try {
+                return decodeURIComponent(escape(text));
+            } catch {
+                return text;
+            }
+        }
 
-    if (byte === 0x0A && !oneLine) {
-      // إذا newline => سطر جديد بلا "=0A"
-      encoded += "\r\n";
-      lineLength = 0;
-      continue;
-    }
-
-    if ((byte >= 33 && byte <= 126 && byte !== 61) || byte === 9 || byte === 32) {
-      out = String.fromCharCode(byte);
-    } else {
-      out = "=" + byte.toString(16).toUpperCase().padStart(2, "0");
-    }
-
-    if (!oneLine && lineLength + out.length > maxLineLength) {
-      encoded += "=\r\n";
-      lineLength = 0;
-    }
-    encoded += out;
-    lineLength += out.length;
-  }
-
-  return encoded;
-}
-
-
-// Decode stays simple (UTF-8 mainly)
-function decodeQuotedPrintable(input) {
-  let text = input.replace(/=\r?\n/g, "");
-  text = text.replace(/=([A-Fa-f0-9]{2})/g,
-    (m, hex) => String.fromCharCode(parseInt(hex, 16))
-  );
-  try {
-    return decodeURIComponent(escape(text));
-  } catch {
-    return text;
-  }
-}
-
-const inputQP = document.getElementById('inputQP');
-const resultQP = document.getElementById('resultQP');
-document.getElementById('encodeQP').addEventListener('click', ()=>{
-  const raw = inputQP.value;
-  if(!raw){ resultQP.textContent='(empty)'; return; }
-  const charset = document.getElementById('charsetQP').value;
-  const oneLine = document.getElementById('oneLineQP').checked;
-  resultQP.textContent = encodeQPWithOptions(raw, charset, oneLine);
-});
-document.getElementById('decodeQP').addEventListener('click', ()=>{
-  const raw = inputQP.value;
-  if(!raw){ resultQP.textContent='(empty)'; return; }
-  resultQP.textContent = decodeQuotedPrintable(raw);
-});
-document.getElementById('clearQP').addEventListener('click', ()=>{
-  inputQP.value=''; resultQP.textContent='(no output yet)';
-});
-</script>
+        const inputQP = document.getElementById('inputQP');
+        const resultQP = document.getElementById('resultQP');
+        
+        document.getElementById('encodeQP').addEventListener('click', ()=>{
+            const raw = inputQP.value;
+            if(!raw){ resultQP.textContent='(empty)'; return; }
+            const charset = document.getElementById('charsetQP').value;
+            const oneLine = document.getElementById('oneLineQP').checked;
+            resultQP.textContent = encodeQPWithOptions(raw, charset, oneLine);
+        });
+        
+        document.getElementById('decodeQP').addEventListener('click', ()=>{
+            const raw = inputQP.value;
+            if(!raw){ resultQP.textContent='(empty)'; return; }
+            resultQP.textContent = decodeQuotedPrintable(raw);
+        });
+        
+        document.getElementById('clearQP').addEventListener('click', ()=>{
+            inputQP.value=''; resultQP.textContent='(no output yet)';
+        });
+    </script>
 </body>
 </html>
