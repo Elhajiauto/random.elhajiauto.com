@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tools – Random & IPv6</title>
+  <title>Tools – Random, IPv6, Quoted-Printable</title>
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#60a5fa}
     body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
@@ -56,6 +56,37 @@
       </div>
       <h3>Result</h3>
       <pre id="resultIPv6">(no output yet)</pre>
+    </div>
+
+    <!-- Card 3: Quoted-Printable Encode/Decode -->
+    <div class="card">
+      <h2>Quoted-Printable Encode/Decode</h2>
+      <p class="muted">Enter text or Quoted-Printable data, then choose Encode or Decode.</p>
+      <label for="inputQP">Input</label>
+      <textarea id="inputQP" placeholder="Hello World =3D Test"></textarea>
+
+      <!-- Options -->
+      <div class="row">
+        <label for="charsetQP" style="flex:1">
+          Charset:
+          <select id="charsetQP">
+            <option value="utf-8">UTF-8</option>
+            <option value="iso-8859-1">ISO-8859-1</option>
+          </select>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="oneLineQP"> One line
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="encodeQP">Encode</button>
+        <button id="decodeQP">Decode</button>
+        <button class="secondary" id="clearQP">Clear</button>
+      </div>
+
+      <h3>Result</h3>
+      <pre id="resultQP">(no output yet)</pre>
     </div>
   </div>
 
@@ -163,7 +194,6 @@ function ipv4ToIpv6Mapped(ip) {
 
   return `::ffff:${part1}:${part2}`;
 }
-
 const inputIPv4 = document.getElementById('inputIPv4');
 const resultIPv6 = document.getElementById('resultIPv6');
 document.getElementById('ipv6Btn').addEventListener('click', ()=>{
@@ -172,6 +202,81 @@ document.getElementById('ipv6Btn').addEventListener('click', ()=>{
   const lines = raw.split(/\r?\n/).filter(Boolean);
   const converted = lines.map(ip => ipv4ToIpv6Mapped(ip) || `(invalid IPv4: ${ip})`);
   resultIPv6.textContent = converted.join('\n');
+});
+
+/* ---------------- QUOTED-PRINTABLE ---------------- */
+function encodeQPWithOptions(str, charset, oneLine) {
+  let buffer;
+  if (charset.toLowerCase() === 'utf-8') {
+    buffer = new TextEncoder().encode(str);
+  } else if (charset.toLowerCase() === 'iso-8859-1') {
+    buffer = new Uint8Array(str.split('').map(c => c.charCodeAt(0) & 0xFF));
+  } else {
+    buffer = new TextEncoder().encode(str);
+  }
+
+  const maxLineLength = 76;
+  let encoded = "";
+  let lineLength = 0;
+
+  for (let i=0; i<buffer.length; i++) {
+    const byte = buffer[i];
+    let out;
+
+    if (byte === 0x0A && !oneLine) {
+      // إذا newline => سطر جديد بلا "=0A"
+      encoded += "\r\n";
+      lineLength = 0;
+      continue;
+    }
+
+    if ((byte >= 33 && byte <= 126 && byte !== 61) || byte === 9 || byte === 32) {
+      out = String.fromCharCode(byte);
+    } else {
+      out = "=" + byte.toString(16).toUpperCase().padStart(2, "0");
+    }
+
+    if (!oneLine && lineLength + out.length > maxLineLength) {
+      encoded += "=\r\n";
+      lineLength = 0;
+    }
+    encoded += out;
+    lineLength += out.length;
+  }
+
+  return encoded;
+}
+
+
+// Decode stays simple (UTF-8 mainly)
+function decodeQuotedPrintable(input) {
+  let text = input.replace(/=\r?\n/g, "");
+  text = text.replace(/=([A-Fa-f0-9]{2})/g,
+    (m, hex) => String.fromCharCode(parseInt(hex, 16))
+  );
+  try {
+    return decodeURIComponent(escape(text));
+  } catch {
+    return text;
+  }
+}
+
+const inputQP = document.getElementById('inputQP');
+const resultQP = document.getElementById('resultQP');
+document.getElementById('encodeQP').addEventListener('click', ()=>{
+  const raw = inputQP.value;
+  if(!raw){ resultQP.textContent='(empty)'; return; }
+  const charset = document.getElementById('charsetQP').value;
+  const oneLine = document.getElementById('oneLineQP').checked;
+  resultQP.textContent = encodeQPWithOptions(raw, charset, oneLine);
+});
+document.getElementById('decodeQP').addEventListener('click', ()=>{
+  const raw = inputQP.value;
+  if(!raw){ resultQP.textContent='(empty)'; return; }
+  resultQP.textContent = decodeQuotedPrintable(raw);
+});
+document.getElementById('clearQP').addEventListener('click', ()=>{
+  inputQP.value=''; resultQP.textContent='(no output yet)';
 });
 </script>
 </body>
