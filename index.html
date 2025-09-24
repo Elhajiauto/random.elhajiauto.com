@@ -399,12 +399,30 @@
                 </div>
             </div>
         </div>
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">🛡️</div>
+    <h2>SPF Lookup (Multi-Domain)</h2>
+  </div>
+  <p class="card-description">Enter one or more domains (one per line) to fetch their SPF records via DNS-over-HTTPS.</p>
 
+  <label for="inputDomains">Domains</label>
+  <textarea id="inputDomains" placeholder="example.com&#10;gmail.com&#10;outlook.com"></textarea>
+
+  <div class="row" style="margin-top:12px;">
+    <button id="fetchMultiSPFBtn"><span>Fetch SPF (DNS)</span></button>
+    <button id="copyMultiSPFBtn"><span>Copy All</span></button>
+  </div>
+
+  <div class="result-container">
+    <div class="result-label">SPF Results</div>
+    <div class="result-box" id="resultMultiSPF">(no output yet)</div>
+  </div>
+</div>
         <div class="footer">
             <p>All-in-One Tools &copy; 2023 | Data is processed locally in your browser</p>
         </div>
     </div>
-
     <script>
         /* ---------------- RANDOM GENERATOR ---------------- */
         function analyzeLine(line){
@@ -614,6 +632,76 @@
         document.getElementById('clearQP').addEventListener('click', ()=>{
             inputQP.value=''; resultQP.textContent='(no output yet)';
         });
+		
+		/* ---------------- MULTI SPF LOOKUP ---------------- */
+
+const inputDomains = document.getElementById('inputDomains');
+const resultMultiSPF = document.getElementById('resultMultiSPF');
+const fetchMultiSPFBtn = document.getElementById('fetchMultiSPFBtn');
+const copyMultiSPFBtn = document.getElementById('copyMultiSPFBtn');
+
+async function dohFetchTXT(domain) {
+  try {
+    const url = `https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=16`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || !data.Answer) return null;
+    const txts = data.Answer.map(a => a.data.replace(/^"|"$/g, '').replace(/"\s*"/g,'').trim());
+    return txts;
+  } catch {
+    return null;
+  }
+}
+
+function extractSPF(txts) {
+  if (!txts) return null;
+  for (const t of txts) {
+    const idx = t.toLowerCase().indexOf('v=spf1');
+    if (idx !== -1) return t.substring(idx).trim().replace(/\s+/g,' ');
+  }
+  return null;
+}
+
+fetchMultiSPFBtn.addEventListener('click', async ()=>{
+  const raw = inputDomains.value.trim();
+  if (!raw) { resultMultiSPF.textContent = '(empty)'; return; }
+  const domains = raw.split(/\r?\n/).map(d=>d.trim()).filter(Boolean);
+
+  resultMultiSPF.textContent = 'Fetching...';
+  let results = [];
+  for (const d of domains) {
+    let txts = await dohFetchTXT(d);
+    let spf = extractSPF(txts);
+    if (!spf) {
+      // try common subdomains
+      const tries = [`_spf.${d}`, `spf.${d}`];
+      for (const cand of tries) {
+        txts = await dohFetchTXT(cand);
+        spf = extractSPF(txts);
+        if (spf) break;
+      }
+    }
+    results.push(`${d}: ${spf || '(no SPF found)'}`);
+  }
+  resultMultiSPF.textContent = results.join("\n");
+});
+
+copyMultiSPFBtn.addEventListener('click', async ()=>{
+  const t = resultMultiSPF.textContent;
+  if (!t || t.startsWith('(no')) return;
+  try {
+    await navigator.clipboard.writeText(t);
+    const original = copyMultiSPFBtn.innerHTML;
+    copyMultiSPFBtn.innerHTML = '<span>Copied!</span>';
+    setTimeout(()=>{ copyMultiSPFBtn.innerHTML = original; }, 1400);
+  } catch {
+    const original = copyMultiSPFBtn.innerHTML;
+    copyMultiSPFBtn.innerHTML = '<span>Copy failed</span>';
+    setTimeout(()=>{ copyMultiSPFBtn.innerHTML = original; }, 1400);
+  }
+});
+</script>
     </script>
 </body>
 </html>
