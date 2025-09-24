@@ -633,7 +633,7 @@
             inputQP.value=''; resultQP.textContent='(no output yet)';
         });
 		
-		/* ---------------- MULTI SPF LOOKUP ---------------- */
+/* ---------------- MULTI SPF LOOKUP with include resolve ---------------- */
 
 const inputDomains = document.getElementById('inputDomains');
 const resultMultiSPF = document.getElementById('resultMultiSPF');
@@ -663,6 +663,30 @@ function extractSPF(txts) {
   return null;
 }
 
+async function resolveSPF(domain, depth=0, seen=new Set()) {
+  if (seen.has(domain)) return "  ".repeat(depth) + "↳ " + domain + ": (loop detected)";
+  seen.add(domain);
+
+  const txts = await dohFetchTXT(domain);
+  const spf = extractSPF(txts);
+  if (!spf) return "  ".repeat(depth) + "↳ " + domain + ": (no SPF found)";
+
+  let output = "  ".repeat(depth) + "↳ " + domain + ":\n" +
+               "  ".repeat(depth+1) + spf;
+
+  const parts = spf.split(/\s+/);
+  for (const p of parts) {
+    if (p.startsWith("include:")) {
+      const sub = p.split(":")[1];
+      const subRes = await resolveSPF(sub, depth+1, seen);
+      output += "\n" + subRes;
+    } else if (p.startsWith("ip4:") || p.startsWith("ip6:")) {
+      output += "\n" + "  ".repeat(depth+1) + "• " + p;
+    }
+  }
+  return output;
+}
+
 fetchMultiSPFBtn.addEventListener('click', async ()=>{
   const raw = inputDomains.value.trim();
   if (!raw) { resultMultiSPF.textContent = '(empty)'; return; }
@@ -671,20 +695,10 @@ fetchMultiSPFBtn.addEventListener('click', async ()=>{
   resultMultiSPF.textContent = 'Fetching...';
   let results = [];
   for (const d of domains) {
-    let txts = await dohFetchTXT(d);
-    let spf = extractSPF(txts);
-    if (!spf) {
-      // try common subdomains
-      const tries = [`_spf.${d}`, `spf.${d}`];
-      for (const cand of tries) {
-        txts = await dohFetchTXT(cand);
-        spf = extractSPF(txts);
-        if (spf) break;
-      }
-    }
-    results.push(`${d}: ${spf || '(no SPF found)'}`);
+    const tree = await resolveSPF(d);
+    results.push(tree);
   }
-  resultMultiSPF.textContent = results.join("\n");
+  resultMultiSPF.textContent = results.join("\n\n");
 });
 
 copyMultiSPFBtn.addEventListener('click', async ()=>{
