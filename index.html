@@ -27,6 +27,16 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Mode nuit */
+        body.dark-mode {
+            --dark: #f8fafc;
+            --darker: #e2e8f0;
+            --light: #0f172a;
+            --gray: #94a3b8;
+            --gray-light: #1e293b;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -40,6 +50,7 @@
             min-height: 100vh;
             line-height: 1.6;
             padding: 0;
+            transition: var(--transition);
         }
 
         .container {
@@ -53,6 +64,10 @@
             margin-bottom: 40px;
             padding: 40px 0 30px;
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
 
         .header::before {
@@ -102,6 +117,11 @@
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
+        }
+
+        body.dark-mode .card {
+            background: #1e293b;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
         .card::before {
@@ -175,11 +195,22 @@
             transition: var(--transition);
         }
 
+        body.dark-mode textarea {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
         textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
             background: white;
+        }
+
+        body.dark-mode textarea:focus {
+            background: #1e293b;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
 
         .row {
@@ -218,11 +249,22 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
+        body.dark-mode button.secondary {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
         button.secondary:hover {
             background: #f8fafc;
             color: var(--dark);
             border-color: var(--primary-light);
             transform: translateY(-1px);
+        }
+
+        body.dark-mode button.secondary:hover {
+            background: #334155;
+            color: #e2e8f0;
         }
 
         .result-container {
@@ -262,8 +304,18 @@
             transition: var(--transition);
         }
 
+        body.dark-mode .result-box {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
         .result-box:hover {
             background: #f1f5f9;
+        }
+
+        body.dark-mode .result-box:hover {
+            background: #334155;
         }
 
         .result-box::-webkit-scrollbar {
@@ -295,6 +347,12 @@
             font-size: 14px;
             color: var(--dark);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .select-wrapper {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
         }
 
         select {
@@ -330,6 +388,12 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
+        body.dark-mode .checkbox-wrapper {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
         input[type="checkbox"] {
             width: 18px;
             height: 18px;
@@ -346,8 +410,38 @@
             border-top: 1px solid var(--gray-light);
         }
 
+        body.dark-mode .footer {
+            border-color: #334155;
+        }
+
         .spacer {
             flex: 1;
+        }
+
+        /* Bouton mode nuit */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: var(--gradient);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: translateY(-3px) rotate(30deg);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -369,6 +463,14 @@
             
             .header {
                 padding: 30px 0 20px;
+            }
+            
+            .dark-mode-toggle {
+                top: 15px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
             }
         }
 
@@ -406,6 +508,11 @@
             transition: var(--transition);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             border: 1px solid transparent;
+        }
+
+        body.dark-mode .tool-tab {
+            background: #1e293b;
+            color: #e2e8f0;
         }
 
         .tool-tab:hover {
@@ -462,9 +569,18 @@
             font-size: 0.9em;
             color: var(--primary-dark);
         }
+
+        body.dark-mode code {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+        }
     </style>
 </head>
 <body>
+    <button class="dark-mode-toggle" id="darkModeToggle" title="Mode nuit">
+        <i class="fas fa-moon"></i>
+    </button>
+
     <div class="container">
         <div class="header">
             <h1>All-in-One Developer Tools</h1>
@@ -638,6 +754,28 @@
     <div class="notification" id="notification">Copied to clipboard!</div>
 
     <script>
+        // Mode nuit functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Vérifier le stockage local pour le mode nuit
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        });
+
         // Notification function
         function showNotification(message) {
             const notification = document.getElementById('notification');
